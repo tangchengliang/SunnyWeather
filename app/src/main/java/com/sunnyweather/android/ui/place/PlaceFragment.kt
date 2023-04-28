@@ -5,16 +5,22 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.sunnyweather.android.MainActivity
 import com.sunnyweather.android.R
 
 class PlaceFragment : Fragment() {
+
+    lateinit var recyclerView: RecyclerView
+
+    lateinit var searchPlaceEdit :TextView
 
     val viewModel by lazy { ViewModelProviders.of(this).get(PlaceViewModel::class.java) }
 
@@ -24,10 +30,22 @@ class PlaceFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_place, container, false)
     }
 
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        initWidget(view)
+    }
+
+    private fun initWidget(view: View) {
+         recyclerView  = view.findViewById(R.id.recyclerView)
+        searchPlaceEdit = view.findViewById(R.id.searchPlaceEdit)
+    }
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
         val layoutManager = LinearLayoutManager(activity)
+
         recyclerView.layoutManager = layoutManager
         adapter = PlaceAdapter(this, viewModel.placeList)
         recyclerView.adapter = adapter
