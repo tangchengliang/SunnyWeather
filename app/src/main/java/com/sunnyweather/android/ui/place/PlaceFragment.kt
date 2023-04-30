@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
@@ -20,13 +21,19 @@ class PlaceFragment : Fragment() {
 
     lateinit var recyclerView: RecyclerView
 
-    lateinit var searchPlaceEdit :TextView
+    lateinit var searchPlaceEdit: TextView
+
+    lateinit var bgImageView: ImageView
 
     val viewModel by lazy { ViewModelProviders.of(this).get(PlaceViewModel::class.java) }
 
     private lateinit var adapter: PlaceAdapter
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         return inflater.inflate(R.layout.fragment_place, container, false)
     }
 
@@ -37,8 +44,9 @@ class PlaceFragment : Fragment() {
     }
 
     private fun initWidget(view: View) {
-         recyclerView  = view.findViewById(R.id.recyclerView)
+        recyclerView = view.findViewById(R.id.recyclerView)
         searchPlaceEdit = view.findViewById(R.id.searchPlaceEdit)
+        bgImageView = view.findViewById(R.id.bgImageView)
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -60,7 +68,7 @@ class PlaceFragment : Fragment() {
                 adapter.notifyDataSetChanged()
             }
         }
-        viewModel.placeLiveData.observe(this, Observer{ result ->
+        viewModel.placeLiveData.observe(this, Observer { result ->
             val places = result.getOrNull()
             if (places != null) {
                 recyclerView.visibility = View.VISIBLE
