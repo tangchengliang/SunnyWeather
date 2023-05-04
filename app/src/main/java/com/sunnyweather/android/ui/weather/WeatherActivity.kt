@@ -1,20 +1,25 @@
 package com.sunnyweather.android.ui.weather
 
+import android.content.Context
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.view.GravityCompat
 import androidx.databinding.DataBindingUtil
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.ViewModelProviders
 import com.sunnyweather.android.R
 import com.sunnyweather.android.databinding.ActivityWeatherBinding
 import com.sunnyweather.android.databinding.ForecastBinding
 import com.sunnyweather.android.databinding.LifeIndexBinding
 import com.sunnyweather.android.databinding.NowBinding
+import com.sunnyweather.android.logic.Repository.refreshWeather
 import com.sunnyweather.android.logic.model.Weather
 import com.sunnyweather.android.logic.model.getSky
 import java.text.SimpleDateFormat
@@ -43,9 +48,10 @@ class WeatherActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         // 融合状态栏
         val decorView = window.decorView
-        decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+        decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
         window.statusBarColor = Color.TRANSPARENT
 
         activityWeatherBinding.weatherLayout.visibility = View.VISIBLE
@@ -67,10 +73,36 @@ class WeatherActivity : AppCompatActivity() {
                 Toast.makeText(this, "无法成功获取天气信息", Toast.LENGTH_SHORT).show()
                 result.exceptionOrNull()?.printStackTrace()
             }
-//            swipeRefresh.isRefreshing = false
+            // 刷新完后，设置为false
+            activityWeatherBinding.swipeRefresh.isRefreshing = false
         }
 
-        viewModel.refreshWeather(viewModel.locationLng, viewModel.locationLat)
+        // 刷新天气
+        activityWeatherBinding.swipeRefresh.setColorSchemeResources(R.color.colorPrimary)
+        refreshWeather()
+        activityWeatherBinding.swipeRefresh.setOnRefreshListener {
+            refreshWeather()
+        }
+//        viewModel.refreshWeather(viewModel.locationLng, viewModel.locationLat)
+
+        // 更改城市
+        nowBinding.navBtn.setOnClickListener {
+            activityWeatherBinding.drawerLayout.openDrawer(GravityCompat.START)
+        }
+        activityWeatherBinding.drawerLayout.addDrawerListener(object :DrawerLayout.DrawerListener {
+            override fun onDrawerSlide(drawerView: View, slideOffset: Float) {}
+
+            override fun onDrawerOpened(drawerView: View) {}
+
+            override fun onDrawerClosed(drawerView: View) {
+                // 当滑动菜单隐藏时，也要隐藏输入法
+                val manager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                manager.hideSoftInputFromWindow(drawerView.windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
+            }
+
+            override fun onDrawerStateChanged(newState: Int) {}
+
+        })
     }
 
     private fun showWeatherInfo(weather: Weather) {
@@ -123,5 +155,10 @@ class WeatherActivity : AppCompatActivity() {
             carWashingText.text = lifeIndex.carWashing[0].desc
         }
         activityWeatherBinding.weatherLayout.visibility = View.VISIBLE
+    }
+
+    private fun refreshWeather(){
+        viewModel.refreshWeather(viewModel.locationLng, viewModel.locationLat)
+        activityWeatherBinding.swipeRefresh.isRefreshing = true
     }
 }
