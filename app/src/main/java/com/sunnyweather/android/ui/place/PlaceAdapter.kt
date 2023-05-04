@@ -7,9 +7,10 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.sunnyweather.android.R
 import com.sunnyweather.android.logic.model.Place
-
-
-class PlaceAdapter(private val fragment: PlaceFragment, private val placeList: List<Place>) : RecyclerView.Adapter<PlaceAdapter.ViewHolder>() {
+class PlaceAdapter(
+    private val placeList: List<Place>,
+    private val onPlaceItemClick: (Place) -> Unit
+) : RecyclerView.Adapter<PlaceAdapter.ViewHolder>() {
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val placeName: TextView = view.findViewById(R.id.placeName)
@@ -18,7 +19,6 @@ class PlaceAdapter(private val fragment: PlaceFragment, private val placeList: L
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.place_item, parent, false)
-
         return ViewHolder(view)
     }
 
@@ -26,6 +26,14 @@ class PlaceAdapter(private val fragment: PlaceFragment, private val placeList: L
         val place = placeList[position]
         holder.placeName.text = place.name
         holder.placeAddress.text = place.address
+        holder.itemView.setOnClickListener {
+            onPlaceItemClick.invoke(place)
+            /*activity.drawerLayout.closeDrawers()
+            activity.viewModel.locationLng = place.location.lng
+            activity.viewModel.locationLat = place.location.lat
+            activity.viewModel.placeName = place.name
+            activity.refreshWeather()*/
+        }
     }
 
     override fun getItemCount() = placeList.size
